@@ -104,4 +104,3 @@ def getScreenAreaLarge():
     im.show()
 
 getScreenAreaLarge()
-
