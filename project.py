@@ -3,6 +3,8 @@
 import logging
 import sys
 import time
+import pyautogui
+from win32 import GetSystemMetrics
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s',
                     level=logging.DEBUG,
@@ -48,6 +50,41 @@ def get_mouse_position():
         print(sys.version)
     return mouse_position
 
-while(True):
-    print(get_mouse_position())
-    time.sleep(2)
+
+def get_screen_area():
+    mouse_coordinates = get_mouse_position()
+
+    screenWidth = GetSystemMetrics(0)
+    screenHeight = GetSystemMetrics(1)
+
+    screenshotLocationX = mouse_coordinates['x'] - 250
+    screenshotLocationY = mouse_coordinates['y'] - 250
+
+    # if (screenshotLocationX < 250) and (screenshotLocationY < 250):
+    #     screenshotLocationX=0
+    #     screenshotLocationY=0
+    # elif (screenshotLocationX<250) and (screenshotLocationY + 500> screenHeight):
+    #     screenshotLocationX=0
+    #     screenshotLocationY = screenHeight - 500
+    # elif (screenshotLocationX + 500 > screenWidth and screenshotLocationY + 500):
+    #     screenshotLocationX = screenWidth - 500
+    #     screenshotLocationY = screenHeight - 500
+    # elif (screenshotLocationX + 500 > screenWidth and screenshotLocationY<250):
+    #     screenshotLocationX = screenWidth - 500
+    #     screenshotLocationY = 0
+
+    if screenshotLocationX < 500:
+        screenshotLocationX = 0
+    if screenshotLocationY < 500:
+        screenshotLocationY = 0
+    if screenshotLocationX + 500 > screenWidth:
+        screenshotLocationX = screenWidth - 500
+    if screenshotLocationY + 500 > screenHeight:
+        screenshotLocationY = screenWidth - 500
+
+    im = pyautogui.screenshot("screen_region.jpg", region=(
+        screenshotLocationX, screenshotLocationY, 500, 500))
+    im.show()
+
+
+get_screen_area()
