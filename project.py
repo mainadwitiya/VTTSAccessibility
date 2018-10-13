@@ -4,14 +4,15 @@ import logging
 import sys
 import time
 import pyautogui
-from win32 import GetSystemMetrics
+from win32api import GetSystemMetrics
+from pynput import mouse
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s',
                     level=logging.DEBUG,
                     stream=sys.stdout)
 
 
-def get_mouse_position():
+def getMousePosition():
     """
     Get the current position of the mouse.
 
@@ -51,40 +52,56 @@ def get_mouse_position():
     return mouse_position
 
 
-def get_screen_area():
-    mouse_coordinates = get_mouse_position()
+def getScreenAreaStripe():
+    mouse_coordinates = getMousePosition()
 
     screenWidth = GetSystemMetrics(0)
     screenHeight = GetSystemMetrics(1)
 
     screenshotLocationX = mouse_coordinates['x'] - 250
-    screenshotLocationY = mouse_coordinates['y'] - 250
+    screenshotLocationY = mouse_coordinates['y'] -100
 
-    # if (screenshotLocationX < 250) and (screenshotLocationY < 250):
-    #     screenshotLocationX=0
-    #     screenshotLocationY=0
-    # elif (screenshotLocationX<250) and (screenshotLocationY + 500> screenHeight):
-    #     screenshotLocationX=0
-    #     screenshotLocationY = screenHeight - 500
-    # elif (screenshotLocationX + 500 > screenWidth and screenshotLocationY + 500):
-    #     screenshotLocationX = screenWidth - 500
-    #     screenshotLocationY = screenHeight - 500
-    # elif (screenshotLocationX + 500 > screenWidth and screenshotLocationY<250):
-    #     screenshotLocationX = screenWidth - 500
-    #     screenshotLocationY = 0
+    if (screenshotLocationX + 500 > screenWidth ):
+        screenshotLocationX = screenWidth - 500;
+    
 
-    if screenshotLocationX < 500:
-        screenshotLocationX = 0
-    if screenshotLocationY < 500:
-        screenshotLocationY = 0
-    if screenshotLocationX + 500 > screenWidth:
-        screenshotLocationX = screenWidth - 500
-    if screenshotLocationY + 500 > screenHeight:
-        screenshotLocationY = screenWidth - 500
 
     im = pyautogui.screenshot("screen_region.jpg", region=(
-        screenshotLocationX, screenshotLocationY, 500, 500))
+        screenshotLocationX, screenshotLocationY, 500, 200))
     im.show()
 
+def getScreenAreaLarge():
+    initLoc = ()
+    finalLoc = ()
 
-get_screen_area()
+    def on_click(x, y, button, pressed):
+        if pressed:
+            nonlocal initLoc
+            initLoc = (x,y)
+        else:
+            nonlocal finalLoc
+            finalLoc = (x,y)
+        if not pressed:
+            # Stop listener
+            return False
+
+    # Collect events until released
+    with mouse.Listener(
+            on_click=on_click,) as listener:
+        listener.join()
+    
+    
+    print(initLoc)
+    print(finalLoc)
+
+    screenshotLocationX = initLoc[0]
+    screenshotLocationY = initLoc[1]
+
+    screenShotWidth = abs(initLoc[0] - finalLoc[0])
+    screenShotheight = abs (initLoc[1] - finalLoc[1])
+    
+    im = pyautogui.screenshot(region=(screenshotLocationX, screenshotLocationY, screenShotWidth, screenShotheight))
+    im.show()
+
+getScreenAreaLarge()
+
