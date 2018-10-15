@@ -11,6 +11,9 @@ import pytesseract
 import argparse
 import cv2
 import os
+from pygame import mixer
+from gtts import gTTS
+import string
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s',
                     level=logging.DEBUG,
@@ -142,7 +145,15 @@ def ocrCapturedImage():
     
     ocrText = (pytesseract.image_to_string(im, lang='eng',config='--psm 1'))
 
+    ocrText = ocrText.replace('\n', ' ')
+    return ocrText
 
+def textToSpeech():
+    text = ocrCapturedImage()
+    import pyttsx3
+    engine = pyttsx3.init()
+    engine.say(text)
+    engine.runAndWait()  
 
 getScreenAreaLarge()
-ocrCapturedImage()
+textToSpeech()
